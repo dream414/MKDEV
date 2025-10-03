@@ -51,7 +51,7 @@ const Home = () => {
         Download CV🚀
        </motion.a><motion.a
           href="#contact"
-          className="inline-block px-6 py-3 cursor-pointer bg-orange-600 text-white font-medium rounded-lg shadow-md hover:bg-white hover:text-orange-600 transition"
+          className="inline-block px-6 py-3 mt-4 cursor-pointer bg-orange-600 text-white font-medium rounded-lg shadow-md hover:bg-white hover:text-orange-600 transition"
           whileHover={{ scale: 1.05 }}
         >
         Contact Me🚀
