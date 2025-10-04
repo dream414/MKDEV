@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 function App() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [response, setResponse] = useState("");
+  const [loading, setLoading] = useState(false); // ✅ Loading state add
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -12,18 +13,36 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setResponse("");
+
     try {
-      // ✅ Railway deployed backend ka URL yahan laga diya
+      // ✅ Formspree endpoint
       const res = await axios.post(
-      "http://localhost:5000/api/form",
-        formData
+        "https://formspree.io/f/xzzjgnge",
+        formData,
+        {
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json", // ✅ Required
+          },
+        }
       );
-      setResponse(res.data.message);
-      console.log(formData);
-      console.log("the code is running,, please wait...");
-      setFormData({ name: "", email: "", message: "" });
+
+      if (res.data.ok || res.status === 200) {
+        setResponse("✅ Message sent successfully!");
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        setResponse("⚠️ Something went wrong. Please try again.");
+      }
     } catch (err) {
-      setResponse("❌ Error: " + err.message);
+      if (err.response) {
+        setResponse("❌ Error: " + err.response.data.error);
+      } else {
+        setResponse("❌ Network Error: " + err.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,17 +99,29 @@ function App() {
 
           <motion.button
             type="submit"
-            className="w-full py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-xl shadow-lg hover:opacity-60 cursor-pointer transition"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            disabled={loading} // ✅ disable when loading
+            className={`w-full py-3 rounded-xl shadow-lg font-semibold cursor-pointer transition 
+              ${
+                loading
+                  ? "bg-gray-400 text-white"
+                  : "bg-gradient-to-r from-orange-500 to-red-600 text-white hover:opacity-70"
+              }`}
+            whileHover={!loading ? { scale: 1.05 } : {}}
+            whileTap={!loading ? { scale: 0.95 } : {}}
           >
-            🚀 Submit
+            {loading ? "⏳ Sending..." : "🚀 Submit"}
           </motion.button>
         </form>
 
         {response && (
           <motion.p
-            className="mt-4 text-center font-semibold text-gray-700"
+            className={`mt-4 text-center font-semibold ${
+              response.startsWith("✅")
+                ? "text-green-600"
+                : response.startsWith("⚠️")
+                ? "text-yellow-600"
+                : "text-red-600"
+            }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
